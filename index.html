@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Live Bookings Viewer</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 30px;
+      background: linear-gradient(to right, #f8f9fa, #e9ecef);
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #343a40;
+      margin-bottom: 30px;
+    }
+    #stats {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+    }
+    #bookings {
+      max-width: 600px;
+      margin: auto;
+      padding: 0;
+      list-style: none;
+    }
+    .booking {
+      background-color: #ffffff;
+      border-left: 5px solid #007bff;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.3s ease;
+    }
+    .booking:hover {
+      transform: scale(1.02);
+    }
+    .booking-info {
+      flex-grow: 1;
+    }
+    .confirm-btn {
+      background: #28a745;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .confirmed {
+      font-weight: bold;
+      color: #28a745;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 15px;
+      }
+      .booking {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>📋 Live Bookings Viewer</h1>
+  <div id="stats">Total bookings received: <span id="booking-count">0</span></div>
+  <ul id="bookings"></ul>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const bookingsList = document.getElementById('bookings');
+    const bookingCount = document.getElementById('booking-count');
+
+    let count = 0;
+
+    socket.on('new-booking', (data) => {
+      count++;
+      bookingCount.textContent = count;
+
+      const bookingItem = document.createElement('li');
+      bookingItem.className = 'booking';
+
+      const info = document.createElement('div');
+      info.className = 'booking-info';
+      info.textContent = `${data.time} - ${data.venueName} (Party of ${data.partySize})`;
+
+      const confirmBtn = document.createElement('button');
+      confirmBtn.className = 'confirm-btn';
+      confirmBtn.textContent = 'Confirm';
+
+      confirmBtn.addEventListener('click', () => {
+        confirmBtn.remove();
+        const confirmedText = document.createElement('div');
+        confirmedText.className = 'confirmed';
+        confirmedText.textContent = '✅ Confirmed';
+        bookingItem.appendChild(confirmedText);
+      });
+
+      bookingItem.appendChild(info);
+      bookingItem.appendChild(confirmBtn);
+      bookingsList.prepend(bookingItem);
+    });
+  </script>
+</body>
+</html>
